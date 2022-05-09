@@ -52,6 +52,18 @@ Turtlebot3Fake::Turtlebot3Fake()
       &Turtlebot3Fake::command_velocity_callback, \
       this, \
       std::placeholders::_1));
+    
+  // Initialize action server
+  position_server_ = rclcpp_action::create_server<TB3_start>(
+    this->get_node_base_interface(),
+    this->get_node_clock_interface(),
+    this->get_node_logging_interface(),
+    this->get_node_waitables_interface(),
+    "tb3position",
+    std::bind(&Turtlebot3Fake::handle_goal, this, std::placeholders::_1, std::placeholders::_2),
+    std::bind(&Turtlebot3Fake::handle_cancel, this, std::placeholders::_1),
+    std::bind(&Turtlebot3Fake::handle_accepted, this, std::placeholders::_1)
+  );
 
   /************************************************************
   ** initialise ROS timers
@@ -112,9 +124,9 @@ void Turtlebot3Fake::init_variables()
   // memcpy(&(odom_.pose.covariance), pcov, sizeof(double)*36);
   // memcpy(&(odom_.twist.covariance), pcov, sizeof(double)*36);
 
-  odom_pose_[0] = 0.0;
-  odom_pose_[1] = 0.0;
-  odom_pose_[2] = 0.0;
+  odom_pose_[0] = -2.0;
+  odom_pose_[1] = -0.05;
+  odom_pose_[2] = 0.087;
   odom_vel_[0] = 0.0;
   odom_vel_[1] = 0.0;
   odom_vel_[2] = 0.0;
@@ -145,6 +157,35 @@ void Turtlebot3Fake::command_velocity_callback(
     (goal_angular_velocity_ * wheel_seperation_ / 2);
 }
 
+/********************************************************************************
+** Callback functions for ROS action servers
+********************************************************************************/
+rclcpp_action::GoalResponse Turtlebot3Fake::handle_goal(
+    const rclcpp_action::GoalUUID &uuid,
+    std::shared_ptr<const TB3_start::Goal> start
+  )
+{
+  RCLCPP_INFO(this->get_logger(), "Recieved start request");
+  // TODO: Set the position of the robot.
+  return rclcpp_action::GoalResponse::ACCEPT_AND_EXECUTE;
+}
+
+rclcpp_action::CancelResponse Turtlebot3Fake::handle_cancel(
+  const std::shared_ptr<GoalHandleTB3_start> goal_handle
+)
+{
+  RCLCPP_INFO(this->get_logger(), "Recieved request to cancel, currently not implemented");
+  (void)goal_handle;
+  return rclcpp_action::CancelResponse::ACCEPT;
+}
+
+void Turtlebot3Fake::handle_accepted(const std::shared_ptr<GoalHandleTB3_start> goal_handle)
+{
+  const auto goal = goal_handle->get_goal();
+  odom_pose_[0] = goal->start.x;
+  odom_pose_[1] = goal->start.y;
+  odom_pose_[2] = goal->start.z;
+}
 /********************************************************************************
 ** Update functions
 ********************************************************************************/

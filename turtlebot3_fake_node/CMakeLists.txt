@@ -23,6 +23,8 @@ find_package(sensor_msgs REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_msgs REQUIRED)
 find_package(turtlebot3_msgs REQUIRED)
+find_package(turtlebot3_actions REQUIRED)
+find_package(rclcpp_action REQUIRED)
 
 ################################################################################
 # Build
@@ -39,6 +41,8 @@ set(dependencies
   "tf2"
   "tf2_msgs"
   "turtlebot3_msgs"
+  "rclcpp_action"
+  "turtlebot3_actions"
 )
 
 set(EXEC_NAME "turtlebot3_fake_node")
@@ -72,4 +76,6 @@ ament_export_dependencies(sensor_msgs)
 ament_export_dependencies(tf2)
 ament_export_dependencies(tf2_msgs)
 ament_export_dependencies(turtlebot3_msgs)
+ament_export_dependencies(turtlebot3_actions)
+ament_export_dependencies(rclcpp_action)
 ament_package()

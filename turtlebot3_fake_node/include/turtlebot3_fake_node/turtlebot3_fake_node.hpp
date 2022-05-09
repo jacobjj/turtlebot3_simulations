@@ -28,8 +28,17 @@
 #include "tf2_msgs/msg/tf_message.hpp"
 #include "turtlebot3_msgs/msg/sensor_state.hpp"
 
+// Header for action server.
+// NOTE: Even if the file name is Capitalized, the header file
+// should be in small letters.
+#include "turtlebot3_actions/action/tb3start.hpp"
+#include "rclcpp_action/rclcpp_action.hpp"
+
 #define LEFT 0
 #define RIGHT 1
+
+using TB3_start = turtlebot3_actions::action::Tb3start;
+using GoalHandleTB3_start = rclcpp_action::ServerGoalHandle<TB3_start>;
 
 class Turtlebot3Fake : public rclcpp::Node
 {
@@ -53,6 +62,8 @@ private:
   // ROS topic subscribers
   rclcpp::Subscription<geometry_msgs::msg::Twist>::SharedPtr cmd_vel_sub_;
 
+  // ROS set-position action
+  rclcpp_action::Server<TB3_start>::SharedPtr position_server_;
 
   nav_msgs::msg::Odometry odom_;
   sensor_msgs::msg::JointState joint_states_;
@@ -77,5 +88,16 @@ private:
   bool update_odometry(const rclcpp::Duration & diff_time);
   void update_joint_state();
   void update_tf(geometry_msgs::msg::TransformStamped & odom_tf);
+
+  // Topics for action server
+  rclcpp_action::GoalResponse handle_goal(
+    const rclcpp_action::GoalUUID & uuid,
+    std::shared_ptr<const TB3_start::Goal> start
+  );
+  rclcpp_action::CancelResponse handle_cancel(
+    const std::shared_ptr<GoalHandleTB3_start> goal_handle
+  );
+  void handle_accepted(const std::shared_ptr<GoalHandleTB3_start> goal_handle);
+
 };
 #endif  // TURTLEBOT3_FAKE_NODE__TURTLEBOT3_FAKE_NODE_HPP_
